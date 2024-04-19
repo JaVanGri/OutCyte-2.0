@@ -2,7 +2,7 @@
 <img src="logo.svg" alt="OutCyte 2.0 Logo" style="width:100%; text-align:center;">
 
 ## What is OutCyte 2.0?
-**OutCyte 2.0** is a sophisticated tool designed for predicting various cellular localization attributes including signal peptides, transmembrane regions, unconventional protein secretion (UPS), and intracellular proteins, based on the amino acid sequence of proteins.
+**OutCyte 2.0** is an advanced tool designed for predicting various cellular localization attributes including signal peptides, transmembrane regions, unconventional protein secretion (UPS), and intracellular proteins, based on the amino acid sequence of proteins. It is an enhancement over the previous tool developed by Linlin Zhao, which can be found at [Linlin Zhao's OutCyte](https://github.com/linlinzhao/outcyte). This version significantly improves the prediction accuracy for UPS proteins.
 
 ## How to use it?
 To effectively utilize OutCyte 2.0, please follow these steps:
@@ -27,7 +27,12 @@ To effectively utilize OutCyte 2.0, please follow these steps:
    ```
    python execute.py /path/to/your/fasta/file.fasta --mode standard_v2 --device cpu
    ```
-   - Available modes are: `sp`, `ups`, `standard`, and `standard_v2`.
+   - Available modes are:
+        - standard_v2`: Predicts Signal Peptide, Transmembrane, UPS (new model), and Intracellular
+        - `standard`: Uses the old UPS model; predicts Signal Peptide, Transmembrane, and Intracellular.
+        - `sp`: Targets Signal Peptide, Transmembrane, and Intracellular.
+        - `ups`:  Focuses on UPS (old model) and Intracellular.
+        - `ups_v2`: Uses the updated UPS model to differ between UPS and Intracellular.
 
 5. **Access the results**:
    - The result file will be created in the same directory as your input file, named with the mode of operation and additional "_RESULT.csv" suffix.
