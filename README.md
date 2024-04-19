@@ -4,7 +4,7 @@
 ## What is OutCyte 2.0?
 **OutCyte 2.0** is an advanced tool designed for predicting various cellular localization attributes including signal peptides, transmembrane regions, unconventional protein secretion (UPS), and intracellular proteins, based on the amino acid sequence of proteins. It is an enhancement over the previous tool developed by Linlin Zhao, which can be found at [Linlin Zhao's OutCyte](https://github.com/linlinzhao/outcyte). This version significantly improves the prediction accuracy for UPS proteins.
 
-If you prefer there also exists a GUI version of this tool  [OutCyte-2.0-Web](https://github.com/JaVanGri/OutCyte-2.0-Web)
+If you prefer there also exists a GUI version of this tool  [OutCyte-2.0-Web](https://github.com/JaVanGri/OutCyte-2.0-Web).
 ## How to use it?
 To effectively utilize OutCyte 2.0, please follow these steps:
 
