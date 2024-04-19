@@ -1,1 +1,35 @@
-# OutCyte-2.0
+
+<img src="logo.svg" alt="OutCyte 2.0 Logo" style="width:100%; text-align:center;">
+
+## What is OutCyte 2.0?
+**OutCyte 2.0** is a sophisticated tool designed for predicting various cellular localization attributes including signal peptides, transmembrane regions, unconventional protein secretion (UPS), and intracellular proteins, based on the amino acid sequence of proteins.
+
+## How to use it?
+To effectively utilize OutCyte 2.0, please follow these steps:
+
+1. **Install the dependencies**:
+   - Ensure you have Conda installed on your system.
+   - All necessary dependencies are listed in `environment.yml`. Install them by running the following command in the terminal:
+   ```
+   conda env create -f environment.yml
+   ```
+
+2. **Activate the Conda environment**:
+   ```
+   conda activate oc2
+   ```
+
+3. **Prepare your FASTA file**:
+   - Ensure your FASTA file is formatted correctly with sequences you wish to analyze.
+
+4. **Run the application**:
+   - Execute the application by running the command below, specifying the path to your FASTA file, the desired mode of operation, and the computation device (`cpu` or `cuda`):
+   ```
+   python execute.py /path/to/your/fasta/file.fasta --mode standard_v2 --device cpu
+   ```
+   - Available modes are: `sp`, `ups`, `standard`, and `standard_v2`.
+
+5. **Access the results**:
+   - The result file will be created in the same directory as your input file, named with the mode of operation and additional "_RESULT.csv" suffix.
+
+Please note: Adjust the `--max_sequence_length` and `--min_sequence_length` parameters as needed to tailor the analysis to your sequences.

@@ -1,4 +1,4 @@
-name: oc2-server
+name: oc2
 channels:
   - defaults
 dependencies:
