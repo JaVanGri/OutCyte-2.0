@@ -39,3 +39,14 @@ To effectively utilize OutCyte 2.0, please follow these steps:
    - The result file will be created in the same directory as your input file, named with the mode of operation and additional "_RESULT.csv" suffix.
 
 Please note: Adjust the `--max_sequence_length` and `--min_sequence_length` parameters as needed to tailor the analysis to your sequences.
+
+
+## Retraining
+
+If you want to retrain the model on a new dataset, you can do so easily. The training data should be in a CSV file with columns **Entry**, **Sequence**, and **Label**.
+
+You start the training with:
+
+```
+   python retraining.py training_data.csv
+```
