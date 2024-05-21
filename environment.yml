@@ -48,4 +48,4 @@ dependencies:
       - tqdm==4.66.2
       - typing-extensions==4.7.1
       - xgboost==0.90
-prefix: /home/javan/anaconda3/envs/oc2-server
+prefix: /home/javan/anaconda3/envs/oc2

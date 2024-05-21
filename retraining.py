@@ -13,8 +13,8 @@ from sklearn.utils import compute_class_weight
 from bin.scripts.taining_utils import train_step, validation_step
 import warnings
 import json
-import seaborn as sns
-import matplotlib.pyplot as plt
+#import seaborn as sns
+#import matplotlib.pyplot as plt
 
 warnings.filterwarnings("ignore", category=Warning)
 
