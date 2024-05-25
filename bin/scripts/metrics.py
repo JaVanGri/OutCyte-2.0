@@ -50,7 +50,6 @@ def get_tp_tn_fp_fn(predictions, ground_truth):
     return true_positives,true_negatives,false_positives,false_negatives
 
 def calc_metrics(tp,tn,fp,fn):
-    # Ensure both vectors have the same length
 
 
     metrics = {}
@@ -67,12 +66,8 @@ def calc_metrics(tp,tn,fp,fn):
     return metrics
 
 
-#def metrics(y_oc_pred, y_oc):
-#    tn, fp, fn, tp = confusion_matrix(y_oc, y_oc_pred).ravel()
-#    return calc_metrics(tp,tn,fp,fn)
-
 def metrics(predictions, ground_truth):
-    # Ensure both vectors have the same length
+
 
     tp,tn,fp,fn = get_tp_tn_fp_fn(predictions,ground_truth)
 

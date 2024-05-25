@@ -9,7 +9,7 @@ from sklearn.linear_model import LogisticRegression
 
 
 def reducte_list(liste,dimensions):
-    #print(liste)
+
     return [liste[i] for i in dimensions]
 
 def data_to_table(data):
@@ -26,7 +26,7 @@ def calc_best_dimensions_for_every_split(df, rep_c,):
     representation_count = rep_c
     X,y = data_to_table(df)
 
-    estimator = LogisticRegression(max_iter=500)#SVR(kernel="linear")
+    estimator = LogisticRegression(max_iter=500)
     selector = RFE(estimator, n_features_to_select=representation_count, step=40)
     selector = selector.fit(X, y)
     list_of_chosen_dims=X.columns[selector.support_]
@@ -47,11 +47,9 @@ def calc_cls_representation(sequence,model,alphabet,rep_layer,device):
     model= model.to(device)
     batch_tokens = batch_tokens.to(device)
 
-    #print(batch_tokens)
     with torch.no_grad():
         representation = model(batch_tokens,repr_layers=[rep_layer],return_contacts=False)['representations'][rep_layer][:,0,:]
 
-    #print(representation.shape)
     model = model.to('cpu')
     torch.cuda.empty_cache()
     return  representation.to('cpu')[0]
@@ -71,32 +69,32 @@ def get_embedding_dataloader(representations,label,batch_size):
     return dataloader
 
 def train_step(model, dataloader, optimizer, criterion, device):
-    model.train()  # Setzt das Modell in den Trainingsmodus
+    model.train()  
     model.to(device)
     for inputs, labels in dataloader:
-        inputs, labels = inputs.to(device), labels.to(device)  # Verschiebe Daten und Labels auf das richtige Gerät
+        inputs, labels = inputs.to(device), labels.to(device) 
 
-        optimizer.zero_grad()  # Setzt die Gradienten der optimierten Tensor zurück
-        outputs = model(inputs)  # Führt einen Vorwärtsdurchlauf durch
-        loss = criterion(outputs, labels)  # Berechnet den Verlust
-        loss.backward()  # Berechnet die Gradienten
-        optimizer.step()  # Aktualisiert die Parameter
+        optimizer.zero_grad()  
+        outputs = model(inputs)  
+        loss = criterion(outputs, labels) 
+        loss.backward() 
+        optimizer.step()  
 
 
 
 def validation_step(model, dataloader, criterion, device):
-    model.eval()  # Setzt das Modell in den Evaluierungsmodus
+    model.eval()  
     total_loss = 0
     total_correct = 0
     total = 0
-    tp = 0  # Wahre Positive
-    fp = 0  # Falsche Positive
-    fn = 0  # Falsche Negative
-    tn = 0  # Wahre Negative
+    tp = 0  
+    fp = 0  
+    fn = 0  
+    tn = 0  
     model.to(device)
-    with torch.no_grad():  # Deaktiviert die Gradientenberechnung
+    with torch.no_grad(): 
         for inputs, labels in dataloader:
-            inputs, labels = inputs.to(device), labels.to(device)  # Verschiebe Daten und Labels auf das richtige Gerät
+            inputs, labels = inputs.to(device), labels.to(device) 
 
             outputs = model(inputs)
             loss = criterion(outputs, labels)
@@ -104,7 +102,6 @@ def validation_step(model, dataloader, criterion, device):
 
             _, predicted = torch.max(outputs, 1)
 
-            # Update der TP, FP, FN, TN Zähler
             for label, prediction in zip(labels.cpu(), predicted.cpu()):
                 if label == 1 and prediction == 1:
                     tp += 1
@@ -124,7 +121,7 @@ def validation_step(model, dataloader, criterion, device):
 
 
 def prediction_step(model,alphabet, sequence, device):
-    model.eval()  # Setzt das Modell in den Evaluierungsmodus
+    model.eval() 
     model.to(device)
 
     batch_converter = alphabet.get_batch_converter()
@@ -132,31 +129,30 @@ def prediction_step(model,alphabet, sequence, device):
     batch_labels, batch_strs, batch_tokens = batch_converter(data)
 
     batch_tokens=batch_tokens.to(device)
-    #print(batch_tokens.shape)
+
     with torch.no_grad():
         results = model(batch_tokens)
-        #print(results[0][1],results[0][1].item())
 
     results = results.to('cpu')
-    #print(results.item())
+
     return results[0][1].item()
 
 def prediction_step_rep(model, representation, device):
-    model.eval()  # Setzt das Modell in den Evaluierungsmodus
+    model.eval() 
     model.to(device)
 
 
     rep = torch.tensor(representation)
     rep = rep.to(device)
     rep = rep.unsqueeze(0)
-    #print(rep.shape)
+  
 
     with torch.no_grad():
         results = model(rep)
-        #print(results[0][1],results[0][1].item())
+        
 
     results = results.to('cpu')
     rep = rep.to('cpu')
-    #print(results.item())
+
     return results[0][1].item()
 
