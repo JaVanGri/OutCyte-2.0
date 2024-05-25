@@ -20,11 +20,8 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 script_path = os.path.realpath(__file__)
 
-# Erhalte den Verzeichnispfad zum aktuellen Skript
 script_dir = os.path.dirname(script_path)
 
-# Setze das Arbeitsverzeichnis auf das Verzeichnis des Skripts
-#os.chdir(script_dir)
 
 
 class OneHiddenLayer(nn.Module):

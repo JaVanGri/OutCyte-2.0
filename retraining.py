@@ -13,8 +13,7 @@ from sklearn.utils import compute_class_weight
 from bin.scripts.taining_utils import train_step, validation_step
 import warnings
 import json
-#import seaborn as sns
-#import matplotlib.pyplot as plt
+
 
 warnings.filterwarnings("ignore", category=Warning)
 
@@ -93,11 +92,11 @@ def train(data, device, rep_size, hidden_size, drop_out, lr, weight_decay, epoch
 
             if best_metric is None or metric >= best_metric + min_delta:
                 best_metric = metric
-                epochs_no_improve = 0  # Reset counter
+                epochs_no_improve = 0 
                 torch.save(model.state_dict(), f'bin/models/parameter_upsv2/model_{i}.pth')
 
             else:
-                epochs_no_improve += 1  # Increment counter
+                epochs_no_improve += 1 
 
             if epochs_no_improve >= patience:
 
