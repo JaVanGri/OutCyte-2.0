@@ -14,6 +14,7 @@ import logging
 import esm
 import gc
 import warnings
+import tracemalloc
 warnings.filterwarnings('ignore')
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -53,26 +54,61 @@ def read_fasta(filepath):
     return pd.DataFrame(seqs, columns=['Entry', 'Sequence'])
 
 
-def get_representations(df, model, alphabet, rep_layer, device):
+def get_predictions(df, model, alphabet, rep_layer, device):
+    model_dimensions = load_model_parameters()
     embedding = alphabet.get_batch_converter()
-    representations = []
-    model.eval()
-    model.to(device)
+    predictions = {entry: [] for entry in df.Entry.tolist()}
+
+    representation_model = model
+    prediction_models = {key: load_model(key, 560, 40) for key in model_dimensions.keys()}
+
+    if device == 'cuda':
+        representation_model.to(device)
+    representation_model.eval()
+
+    for key in model_dimensions.keys():
+        model = prediction_models[key]
+        if device == 'cuda':
+            model.to(device)
+        model.eval()
+
     with torch.no_grad():
-        for i, (entry, seq) in enumerate(tqdm(df[['Entry', 'Sequence']].values, desc="Calculating representations")):
+        for i, (entry, seq) in enumerate(tqdm(df[['Entry', 'Sequence']].values, desc="Calculating ups predictions...")):
             batch_labels, batch_strs, batch_tokens = embedding([(entry, seq)])
             batch_tokens = batch_tokens.to(device)
-            output = model(batch_tokens, repr_layers=[rep_layer])
-            representation = output['representations'][rep_layer][:, 0, :].squeeze().cpu().numpy()
-            representations.append(representation)
+            output = representation_model(batch_tokens, repr_layers=[rep_layer])
+            if device == 'cuda':
+                representation = output['representations'][rep_layer][:, 0, :].squeeze().cpu().numpy()
+            else:
+                representation = output['representations'][rep_layer][:, 0, :].squeeze().numpy()
 
-            # Explizite Freigabe des Speichers von Tensoren, die nicht mehr benötigt werden
-            del batch_tokens, output, representation
-            if i % 100 == 0:  # gc.collect() nach jeder 100. Sequenz aufrufen
+            for key in model_dimensions.keys():
+                model = prediction_models[key]
+
+                dimensions = model_dimensions[key]
+                reduced_representation = reduce_list(representation, dimensions)
+
+                t_repr = torch.Tensor([reduced_representation])
+                t_repr = t_repr.to(device)
+                with torch.no_grad():
+                    output = model.forward(t_repr)
+                    output = output.cpu()
+                    ups_prob = output[0][1].item()
+                    predictions[entry].append(ups_prob)
+
+            predictions[entry] = np.mean(predictions[entry])
+
+
+            del batch_tokens, output, batch_labels, batch_strs, representation
+            if device == 'cuda':
+                torch.cuda.empty_cache()
+            if i % 100 == 0:
                 gc.collect()
 
-    return representations
+    ups_prob = list(predictions.values())
+    keys = list(predictions.keys())
 
+    return pd.DataFrame({'entry': keys, 'ups': ups_prob, 'intracellular': 1 - np.array(ups_prob)})
 
 def load_model_parameters():
     with open(script_dir+'/parameter_upsv2/model_dimensions.json', 'r') as file:
@@ -85,38 +121,6 @@ def load_model(model_key, rep_size, hidden_size):
     return model
 
 
-def predict_proteins(df, model_dimensions):
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    predictions = {entry: [] for entry in df.Entry.tolist()}
-
-    total_steps = len(df) * len(model_dimensions.keys())
-    progress_bar = tqdm(total=total_steps,
-                        desc=f'Calculating predictions from {len(model_dimensions.keys())} models for every protein')
-    for model_key, dimensions in model_dimensions.items():
-        model = load_model(model_key, 560, 40).to(device)
-        model.eval()
-
-        df['Representation_reduction'] = df['Representation'].apply(lambda x: reduce_list(x, dimensions))
-        for entry, repr in df[['Entry', 'Representation_reduction']].values:
-            t_repr = torch.Tensor([repr])
-            t_repr = t_repr.to(device)
-            with torch.no_grad():
-                output = model.forward(t_repr)
-                output = output.cpu()
-                ups_prob = output[0][1].item()
-                predictions[entry].append(ups_prob)
-
-            progress_bar.update(1)
-
-    for entry in df['Entry'].values:
-        predictions[entry] = np.mean(predictions[entry])
-
-    ups_prob = list(predictions.values())
-    keys = list(predictions.keys())
-
-    return pd.DataFrame({'entry':keys,'ups':ups_prob,'intracellular':1-np.array(ups_prob)})
-
-
 def exclude_long_proteins(df, max_sequence_length):
     df['Length'] = df['Sequence'].str.len()
     df = df[df['Length'] <= max_sequence_length]
@@ -126,20 +130,7 @@ def exclude_long_proteins(df, max_sequence_length):
 
 
 def predict_ups(entrys, sequences, device='cpu'):
-    #Calculate Representations
-
     df = pd.DataFrame({'Entry':entrys,'Sequence':sequences})
     model, alphabet = esm.pretrained.esm2_t30_150M_UR50D()
-    df['Representation'] = get_representations(df, model, alphabet, rep_layer=30, device=device)
-
-    #Calculate Predictions
-    model_dimensions = load_model_parameters()
-    predictions = predict_proteins(df, model_dimensions)
-
-    if device == 'cuda':
-        torch.cuda.empty_cache()
-    else:
-        gc.collect()
-
-    return predictions
+    return  get_predictions(df, model, alphabet, rep_layer=30, device=device)
 

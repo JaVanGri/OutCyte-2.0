@@ -20,6 +20,7 @@ def run_standard_mode(file_data):
 
 def run_standard_v2_mode(file_data, device):
     results = run_sp(file_data['Entry'], file_data['Sequence'])
+    print("Calculating UPS predictions...")
     ups_results = predict_ups(file_data['Entry'], file_data['Sequence'], device=device)
     results['ups'] = (1 - results['transmembrane'] - results['signal_peptide']) * ups_results['ups']
     results['intracellular'] = 1 - results['transmembrane'] - results['signal_peptide'] - results['ups']
