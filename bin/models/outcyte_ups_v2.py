@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader, TensorDataset
 from tqdm import tqdm
 import logging
 import esm
-
+import gc
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -59,15 +59,18 @@ def get_representations(df, model, alphabet, rep_layer, device):
     model.eval()
     model.to(device)
     with torch.no_grad():
-        for entry, seq in tqdm(df[['Entry', 'Sequence']].values, desc="Calculating representations"):
+        for i, (entry, seq) in enumerate(tqdm(df[['Entry', 'Sequence']].values, desc="Calculating representations")):
             batch_labels, batch_strs, batch_tokens = embedding([(entry, seq)])
             batch_tokens = batch_tokens.to(device)
             output = model(batch_tokens, repr_layers=[rep_layer])
             representation = output['representations'][rep_layer][:, 0, :].squeeze().cpu().numpy()
             representations.append(representation)
 
-            if torch.cuda.is_available():
-                torch.cuda.empty_cache()
+            # Explizite Freigabe des Speichers von Tensoren, die nicht mehr benötigt werden
+            del batch_tokens, output, representation
+            if i % 100 == 0:  # gc.collect() nach jeder 100. Sequenz aufrufen
+                gc.collect()
+
     return representations
 
 
@@ -133,8 +136,10 @@ def predict_ups(entrys, sequences, device='cpu'):
     model_dimensions = load_model_parameters()
     predictions = predict_proteins(df, model_dimensions)
 
-    if torch.cuda.is_available():
+    if device == 'cuda':
         torch.cuda.empty_cache()
+    else:
+        gc.collect()
 
     return predictions
 

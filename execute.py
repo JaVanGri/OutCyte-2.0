@@ -18,7 +18,7 @@ def run_standard_mode(file_data):
     return results
 
 
-def run_standard_v2_mode(self, file_data, device):
+def run_standard_v2_mode(file_data, device):
     results = run_sp(file_data['Entry'], file_data['Sequence'])
     ups_results = predict_ups(file_data['Entry'], file_data['Sequence'], device=device)
     results['ups'] = (1 - results['transmembrane'] - results['signal_peptide']) * ups_results['ups']
@@ -34,14 +34,15 @@ def dict_to_string(dict):
 
 
 def get_predictions(mode, file_data, device):
+    print("Mode: ", mode)
     if mode == 'standard':
         return run_standard_mode(file_data)
     elif mode == 'sp':
         return run_sp(file_data['Entry'], file_data['Sequence'])
     elif mode == 'ups':
         return run_ups(file_data['Entry'], file_data['Sequence'])
-    elif mode == 'standardv2':
-        return run_standard_v2_mode(file_data)
+    elif mode == 'standard_v2':
+        return run_standard_v2_mode(file_data=file_data, device=device)
     else:
         return predict_ups(file_data['Entry'], file_data['Sequence'], device=device)
 
@@ -84,7 +85,6 @@ def process_input(file_path, max_sequence_length=2700, min_sequence_length=20, a
 def main():
     # Clear the console screen
     os.system('cls' if os.name == 'nt' else 'clear')
-
     # Setup command line argument parsing
     parser = argparse.ArgumentParser(description="Predict secretion pathways based on FASTA file input.")
     parser.add_argument('filepath', type=str, help="Path to the FASTA file")
