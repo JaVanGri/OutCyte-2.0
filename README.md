@@ -30,7 +30,7 @@ To effectively utilize OutCyte 2.0, please follow these steps:
    python execute.py /path/to/your/fasta/file.fasta --mode standard_v2 --device cpu
    ```
    - Available modes are:
-        - standard_v2`: Predicts Signal Peptide, Transmembrane, UPS (new model), and Intracellular
+        - `standard_v2`: Predicts Signal Peptide, Transmembrane, UPS (new model), and Intracellular
         - `standard`: Uses the old UPS model; predicts Signal Peptide, Transmembrane, and Intracellular.
         - `sp`: Targets Signal Peptide, Transmembrane, and Intracellular.
         - `ups`:  Focuses on UPS (old model) and Intracellular.
