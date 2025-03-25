@@ -22,6 +22,7 @@ To effectively utilize OutCyte 2.0, please follow these steps:
 
 3. **Prepare your FASTA file**:
    - Ensure your FASTA file is formatted correctly with sequences you wish to analyze.
+   - **Important**: Protein sequences should **not contain STOP codons (`*`)**.
 
 4. **Run the application**:
    - Execute the application by running the command below, specifying the path to your FASTA file, the desired mode of operation, and the computation device (`cpu` or `cuda`):
@@ -37,6 +38,7 @@ To effectively utilize OutCyte 2.0, please follow these steps:
 
 5. **Access the results**:
    - The result file will be created in the same directory as your input file, named with the mode of operation and additional "_RESULT.csv" suffix.
+   - **Interpreting the results**:    The output scores range from **0 (low confidence)** to **1 (high confidence)**.
 
 Please note: Adjust the `--max_sequence_length` and `--min_sequence_length` parameters as needed to tailor the analysis to your sequences.
 
