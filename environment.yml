@@ -2,7 +2,7 @@ name: oc2
 channels:
   - defaults
 dependencies:
-  - python=3.7.16=h7a1cb2a_0
+  - python=3.7.16
 
   - pip:
       - asgiref==3.7.2
