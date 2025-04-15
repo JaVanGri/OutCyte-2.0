@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 import sys
+from pathlib import Path
 
 from bin.models.outcyte_sp import run_sp
 from bin.models.outcyte_ups import run_ups
@@ -83,10 +84,16 @@ def process_input(file_path, max_sequence_length=2700, min_sequence_length=20, a
     return file_data, None
 
 
+def clear_console():
+    try:
+        os.system('cls' if os.name == 'nt' else 'clear')
+    except Exception:
+        pass 
+
+
 def main():
-    # Clear the console screen
-    os.system('cls' if os.name == 'nt' else 'clear')
-    # Setup command line argument parsing
+    clear_console()
+
     parser = argparse.ArgumentParser(description="Predict secretion pathways based on FASTA file input.")
     parser.add_argument('filepath', type=str, help="Path to the FASTA file")
     parser.add_argument('--max_sequence_length', type=int, default=2700, help="Maximum sequence length")
@@ -99,26 +106,33 @@ def main():
                              "and 'standard_v2'.")
 
     args = parser.parse_args()
+    input_path = Path(args.filepath)
 
-    # Process the input file
-    file_data, error_message = process_input(file_path=args.filepath,
-                                             max_sequence_length=args.max_sequence_length,
-                                             min_sequence_length=args.min_sequence_length)
+    if not input_path.exists():
+        logging.error(f"File {input_path} does not exist.")
+        sys.exit(1)
+
+    file_data, error_message = process_input(
+        file_path=str(input_path),
+        max_sequence_length=args.max_sequence_length,
+        min_sequence_length=args.min_sequence_length
+    )
 
     if error_message:
         logging.error(error_message)
         sys.exit(1)
 
-    # Perform predictions
     logging.info(f"Calculating predictions for {len(file_data)} proteins.")
     results = get_predictions(args.mode, file_data, args.device)
     logging.info("Predictions completed successfully.")
 
-    # Output results
-    result_path = args.filepath.replace('.', '_') + f'_{args.mode}_RESULT.csv'
+
+    result_filename = f"{input_path.stem}_{args.mode}_RESULT.csv"
+    result_path = input_path.with_name(result_filename)
     results.to_csv(result_path)
     logging.info(f"Results saved at {result_path}")
 
 
 if __name__ == "__main__":
     main()
+
