@@ -43,6 +43,23 @@ To effectively utilize OutCyte 2.0, please follow these steps:
 Please note: Adjust the `--max_sequence_length` and `--min_sequence_length` parameters as needed to tailor the analysis to your sequences.
 
 
+## Additional Notes on Runtime and Memory:
+### Runtime and Memory Usage (Example Measurements)
+
+These measurements were taken on an **NVIDIA A100 (80 GB)** GPU.
+
+| Sequence Length `L` | Duration (s) | Peak GPU Memory (GB) |
+|---------------------|--------------|------------------------|
+| 10                  | 0.02         | 0.55                   |
+| 100                 | 0.02         | 0.56                   |
+| 1,000               | 0.02         | 0.72                   |
+| 5,000               | 0.05         | 4.47                   |
+| 10,000              | 0.31         | 16.04                  |
+| 15,000              | 1.40         | 35.26                  |
+| 18,000              | 4.72         | 50.39                  |
+> All runs were executed on an NVIDIA A100 with 80 GB of VRAM. The model scales well up to long sequences, but memory usage increases sharply with sequence length due to quadratic attention complexity.
+
+
 ## Retraining
 
 If you want to retrain the model on a new dataset, you can do so easily. The training data should be in a CSV file with columns **Entry**, **Sequence**, and **Label**.
